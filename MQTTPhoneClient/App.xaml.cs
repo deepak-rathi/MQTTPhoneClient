@@ -173,7 +173,14 @@ namespace MQTTPhoneClient
         {
             if (MqttClient != null && MqttClient.IsConnected)
             {
-                await MqttClient.DisconnectAsync();
+                try
+                {
+                    await MqttClient.DisconnectAsync();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("ERROR: Connection to MQTT broker failed: {0}", ex.Message);
+                }
             }
         }
 
