@@ -50,7 +50,7 @@ namespace MQTTPhoneClient
 
             MqttConnectionInfo connectionInfo = GetConnectionInfo();
 
-            App.Instance.SaveApplicationSetting(App.Instance.MqttConnectionSettingString, connectionInfo);
+            App.Instance.SaveState(App.Instance.MqttConnectionSettingString, connectionInfo);
 
             if (UseSsl.IsChecked == true)
             {
@@ -66,13 +66,14 @@ namespace MQTTPhoneClient
             if (App.Instance.MqttClient.IsConnected)
             {
                 AppendLogMessage(MessageLevel.Info, "Connection successful.");
-                App.Instance.SaveApplicationSetting(App.Instance.MqttConnectedSettingString, true);
+                App.Instance.SaveState(App.Instance.MqttConnectionSettingString, connectionInfo);
+                App.Instance.SaveState(App.Instance.MqttConnectedSettingString, true);
                 NavigateToChildPage();
             }
             else
             {
                 AppendLogMessage(MessageLevel.Error, "ERROR: Connection failed.");
-                App.Instance.SaveApplicationSetting(App.Instance.MqttConnectedSettingString, false);
+                App.Instance.SaveState(App.Instance.MqttConnectedSettingString, false);
             }
         }
 
@@ -82,7 +83,7 @@ namespace MQTTPhoneClient
             {
                 await App.Instance.MqttClient.DisconnectAsync();
                 AppendLogMessage(MessageLevel.Info, "Successfully disconnected.");
-                App.Instance.SaveApplicationSetting(App.Instance.MqttConnectedSettingString, false);
+                App.Instance.SaveState(App.Instance.MqttConnectedSettingString, false);
             }
             catch (Exception ex)
             {
@@ -92,23 +93,20 @@ namespace MQTTPhoneClient
 
         private MqttConnectionInfo GetConnectionInfo()
         {
-            var connectionInfo = new MqttConnectionInfo();
-
             if (HiveMqLocal.IsChecked == true)
             {
-                connectionInfo.HostName = "192.168.0.23";
+                return App.Instance.Connections[0];
             }
             else if (MosquittoLocal.IsChecked == true)
             {
-                connectionInfo.HostName = "192.168.0.16";
+                return App.Instance.Connections[1];
             }
             else if (XivelyRemote.IsChecked == true)
             {
-                connectionInfo.HostName = App.Instance.XivelyUrl;
-                connectionInfo.Username = App.Instance.XivelyApiKey;
+                return App.Instance.Connections[2];
             }
 
-            return connectionInfo;
+            throw new Exception("Unknown option selected.");
         }
 
         private void NavigateToChildPage()

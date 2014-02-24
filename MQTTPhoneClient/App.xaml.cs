@@ -37,10 +37,29 @@ namespace MQTTPhoneClient
         public string MqttConnectedSettingString = "MqttConnected";
 
         // Xively keys and topic names
-        // TODO: Place your unique API key and feed topic names here
-        public string XivelyUrl = "api.xively.com";
-        public string XivelyApiKey = "<XIVELY API KEY HERE>";
+        // TODO: Place your unique feed topic name here
         public string XivelyFeedPath = "/v2/feeds/336438155.csv";
+
+        internal MqttConnectionInfo[] Connections = new[]
+        {
+            new MqttConnectionInfo
+            {
+                ClientName = "Phone8Client",
+                HostName = "192.168.0.23"
+            },
+            new MqttConnectionInfo
+            {
+                ClientName = "Phone8Client",
+                HostName = "192.168.0.16"
+            },
+            new MqttConnectionInfo
+            {
+                ClientName = "Phone8Client",
+                HostName = "api.xively.com",
+                // TODO: Place your unique API key here
+                Username = "<XIVELY API KEY HERE>"
+            },
+        };
 
         /// <summary>
         /// Constructor for the Application object.
@@ -81,35 +100,27 @@ namespace MQTTPhoneClient
 
         }
 
-        #region Application Settings helpers
+        #region Application State helpers
 
-        internal void SaveApplicationSetting(string key, object value)
+        internal void SaveState(string key, object value)
         {
-            if (!IsolatedStorageSettings.ApplicationSettings.Contains(key))
+            if (!PhoneApplicationService.Current.State.ContainsKey(key))
             {
-                IsolatedStorageSettings.ApplicationSettings.Add(key, value);
+                PhoneApplicationService.Current.State.Add(key, value);
             }
             else
             {
-                IsolatedStorageSettings.ApplicationSettings[key] = value;
+                PhoneApplicationService.Current.State[key] = value;
             }
         }
 
-        internal object GetApplicationSetting(string key)
+        internal object GetState(string key)
         {
-            if (IsolatedStorageSettings.ApplicationSettings.Contains(key))
+            if (PhoneApplicationService.Current.State.ContainsKey(key))
             {
-                return IsolatedStorageSettings.ApplicationSettings[key];
+                return PhoneApplicationService.Current.State[key];
             }
             return null;
-        }
-
-        internal void RemoveApplicationSetting(string key)
-        {
-            if (IsolatedStorageSettings.ApplicationSettings.Contains(key))
-            {
-                IsolatedStorageSettings.ApplicationSettings.Remove(key);
-            }
         }
 
         #endregion
@@ -145,10 +156,10 @@ namespace MQTTPhoneClient
         private async void Application_Activated(object sender, ActivatedEventArgs e)
         {
             // Re-establish connection if previously connected
-            var wasConnected = GetApplicationSetting(MqttConnectedSettingString) as bool?;
+            var wasConnected = GetState(MqttConnectedSettingString) as bool?;
             if (wasConnected == true)
             {
-                var connectionInfo = GetApplicationSetting(MqttConnectionSettingString) as MqttConnectionInfo;
+                var connectionInfo = GetState(MqttConnectionSettingString) as MqttConnectionInfo;
                 if (connectionInfo != null)
                 {
                     await ConnectToMqtt(connectionInfo);
@@ -170,9 +181,6 @@ namespace MQTTPhoneClient
         // This code will not execute when the application is deactivated
         private void Application_Closing(object sender, ClosingEventArgs e)
         {
-            RemoveApplicationSetting(MqttConnectionSettingString);
-            RemoveApplicationSetting(MqttConnectedSettingString);
-
             if (MqttClient != null)
             {
                 MqttClient.Dispose();
