@@ -22,6 +22,17 @@ namespace MQTTPhoneClient.Views
             InitializeComponent();
         }
 
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+
+            foreach (var subClient in _subscriptions.Values)
+            {
+                subClient.Close();
+            }
+            _subscriptions.Clear();
+        }
+
         private void MqttClientOnPublishReceived(MqttPublishMessage msg)
         {
             AppendLogMessage(MessageLevel.Info, string.Format("Publish received for topic: {0}, Data={1}", msg.TopicName, msg.StringPayload));

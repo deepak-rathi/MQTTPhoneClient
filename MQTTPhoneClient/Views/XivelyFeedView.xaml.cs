@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Windows;
@@ -26,32 +27,39 @@ namespace MQTTPhoneClient.Views
         {
             base.OnNavigatedTo(e);
 
-            var subscription = new SubscriptionItem
-            {
-                TopicName = App.Instance.XivelyFeedPath,
-                QualityOfService = QualityOfService.AtMostOnce
-            };
-
+            // Create a SubscriptionClient instance to track the subscription, if not already created
             if (_subClient == null)
             {
+                var subscription = new SubscriptionItem
+                {
+                    TopicName = App.Instance.XivelyFeedPath,
+                    QualityOfService = QualityOfService.AtMostOnce
+                };
                 _subClient = App.Instance.MqttClient.CreateSubscription(subscription);
             }
 
-            _subClient.OnMessage(msg =>
+            try
             {
-                string temp;
-                string humid;
-                ParseTempAndHumid(msg.StringPayload, out temp, out humid);
-
-                Dispatcher.BeginInvoke(() =>
+                // Apply a callback to the OnMessage method
+                _subClient.OnMessage(msg =>
                 {
-                    TempTitle.Text = "Temperature (C) " + temp;
-                    HumidTitle.Text = "Humidity (%) " + humid;
-                    TempSlider.Value = float.Parse(temp);
-                    HumidSlider.Value = float.Parse(humid);
-                });
+                    string temp;
+                    string humid;
+                    ParseTempAndHumid(msg.StringPayload, out temp, out humid);
 
-            });
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        TempTitle.Text = "Temperature (C) " + temp;
+                        HumidTitle.Text = "Humidity (%) " + humid;
+                        TempSlider.Value = float.Parse(temp);
+                        HumidSlider.Value = float.Parse(humid);
+                    });
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("ERROR: Unable to subscribe to topic '{0}: {1}", _subClient.TopicName, ex.Message);
+            }
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)

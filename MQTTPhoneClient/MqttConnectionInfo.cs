@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.Serialization;
 
 namespace MQTTPhoneClient
 {
-    internal class MqttConnectionInfo
+    [DataContract]
+    public class MqttConnectionInfo
     {
-        public string ClientName
-        {
-            get { return "Phone8Client"; }
-        }
+        [DataMember]
+        public string ClientName { get; set; }
+        [DataMember]
         public string HostName { get; set; }
+        [DataMember]
         public string Username { get; set; }
+        [DataMember]
         public string Password { get; set; }
     }
 }

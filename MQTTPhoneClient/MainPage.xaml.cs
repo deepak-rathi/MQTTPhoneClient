@@ -89,6 +89,10 @@ namespace MQTTPhoneClient
             {
                 AppendLogMessage(MessageLevel.Error, "ERROR: Disconnect failed with error: " + ex.Message);
             }
+            finally
+            {
+                App.Instance.MqttClient.Dispose();
+            }
         }
 
         private MqttConnectionInfo GetConnectionInfo()
