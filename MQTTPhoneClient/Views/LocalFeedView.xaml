@@ -38,13 +38,21 @@
                     <TextBox Name="PublishTopic" Text="Kitty/Temperature" Width="238"></TextBox>
                     <TextBox Name="PublishData" Width="218"></TextBox>
                 </StackPanel>
-                <Button Name="PublishButton" Content="Publish" Click="PublishButton_OnClick"></Button>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="QoS:" Width="60"></TextBlock>
+                    <ComboBox Name="PublishQos" HorizontalAlignment="Left" Width="167" SelectedIndex="0">
+                        <ComboBoxItem>At Most Once</ComboBoxItem>
+                        <ComboBoxItem>At Least Once</ComboBoxItem>
+                        <ComboBoxItem>Exactly Once</ComboBoxItem>
+                    </ComboBox>
+                    <Button Name="PublishButton" Content="Publish" Click="PublishButton_OnClick" Width="226"></Button>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Button Name="SubscribeButton" Content="Subscribe" Width="226" Click="SubscribeButton_OnClick"></Button>
                     <Button Name="UnsubscribetButton" Content="Unsubscribe" Width="226" Click="UnsubscribetButton_OnClick"></Button>
                 </StackPanel>
             </StackPanel>
-            <views:LogMessageViewer x:Name="LogViewer" Margin="0,450,0,10"/>
+            <views:LogMessageViewer x:Name="LogViewer" Margin="0,263,0,10"/>
         </Grid>
     </Grid>
 

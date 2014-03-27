@@ -38,11 +38,14 @@ namespace MQTTPhoneClient.Views
             AppendLogMessage(MessageLevel.Info, string.Format("Publish received for topic: {0}, Data={1}", msg.TopicName, msg.StringPayload));
         }
 
+        private int _messageId = 0;
         private async void PublishButton_OnClick(object sender, RoutedEventArgs e)
         {
             try
             {
-                await App.Instance.MqttClient.PublishStringAsync(PublishTopic.Text, PublishData.Text);
+                _messageId++;
+                var qos = (QualityOfService)PublishQos.SelectedIndex;
+                await App.Instance.MqttClient.PublishStringAsync(PublishTopic.Text, PublishData.Text, qos, _messageId, false);
                 AppendLogMessage(MessageLevel.Info, "Successfully published data to topic.");
             }
             catch (Exception ex)
